@@ -2,19 +2,21 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - DeathZone
+  - Enemy
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Background
+  - Ground
+  - CameraBound
+  - Enemy
   - 
   - 
   - 
@@ -38,6 +40,23 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background_Back
+    uniqueID: 3208550319
+    locked: 0
+  - name: Background_Middle
+    uniqueID: 498557649
+    locked: 0
+  - name: Background_Front
+    uniqueID: 3937676009
+    locked: 0
+  - name: Ground
+    uniqueID: 690554283
+    locked: 0
+  - name: Character
+    uniqueID: 4076421883
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
+  m_RenderingLayers:
+  - Default
