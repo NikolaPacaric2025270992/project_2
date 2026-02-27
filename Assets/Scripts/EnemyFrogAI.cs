@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class FrogRhythmicPatrol : MonoBehaviour
+public class EnemyFrogAI : MonoBehaviour
 {
     [Header("Jump Physics")]
     public float jumpHeight = 5f;

@@ -129,6 +129,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (rb.linearVelocity.y < -0.1f && transform.position.y > collision.transform.position.y + 0.5f)
+            {
+                EnemyHealth enemy = collision.gameObject.GetComponent<EnemyHealth>();
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(1);
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * 0.75f); // bounce up
+                    anim.SetTrigger("jumpUp");
+                }
+            }
+            else
+            {
+                GetComponent<PlayerHealth>().TakeEnemyDamage(1);
+            }
+        }
+    }
     void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
