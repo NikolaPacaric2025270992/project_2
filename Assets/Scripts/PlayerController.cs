@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -15,12 +17,14 @@ public class PlayerController : MonoBehaviour
     private PlayerControls controls;
     private Vector2 moveInput;
     private bool jumpPressed;
+    private bool isStomping;
 
     public Transform groundCheck;
     public float groundRadius = 0.2f;
     public LayerMask groundLayer;
     public bool isGrounded;
     private bool wasGrounded;
+    private float lockMovementTimer;
 
     private Animator anim;
     public float velocity;
@@ -48,11 +52,17 @@ public class PlayerController : MonoBehaviour
     
     void Update()
     {
-        if (rb.linearVelocity.x > 0.05f)
+        if (lockMovementTimer > 0f)
+        {
+            lockMovementTimer -= Time.deltaTime;
+            return; // skip movement and animation updates while locked
+        }
+
+        if (moveInput.x > 0.05f)
         {
             transform.localScale = new Vector3(1, 1, 1);   // facing right
         }
-        else if (rb.linearVelocity.x < -0.05f)
+        else if (moveInput.x < -0.05f)
         {
             transform.localScale = new Vector3(-1, 1, 1);  // facing left
         }
@@ -129,26 +139,64 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Stomp"))
+        {
+            EnemyHealth enemy = other.GetComponentInParent<EnemyHealth>();
+
+            if (enemy != null)
+            {
+                isStomping = true;
+                enemy.TakeDamage(1);
+
+                Collider2D enemyCollider = other.transform.parent.GetComponent<Collider2D>();
+                if (enemyCollider != null)
+                {
+                    StartCoroutine(IgnoreCollisionRoutine(enemyCollider));
+                }
+
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+
+                anim.SetTrigger("jumpUp");
+
+                coyoteTimeCounter = 0f;
+
+                Invoke(nameof(ResetStomp), 0.1f);
+            }
+        }
+    }
+
+    private void ResetStomp()
+    {
+        isStomping = false;
+    }
+
+    private IEnumerator IgnoreCollisionRoutine(Collider2D enemyCollider)
+    {
+        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, true);
+        yield return new WaitForSeconds(0.2f);
+        if (enemyCollider != null)
+            Physics2D.IgnoreCollision(GetComponent<Collider2D>(), enemyCollider, false);
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            if (rb.linearVelocity.y < -0.1f && transform.position.y > collision.transform.position.y + 0.5f)
+            if (isStomping) return;
+
+            PlayerHealth ph = GetComponent<PlayerHealth>();
+            if (ph != null)
             {
-                EnemyHealth enemy = collision.gameObject.GetComponent<EnemyHealth>();
-                if (enemy != null)
-                {
-                    enemy.TakeDamage(1);
-                    rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * 0.75f); // bounce up
-                    anim.SetTrigger("jumpUp");
-                }
-            }
-            else
-            {
-                GetComponent<PlayerHealth>().TakeEnemyDamage(1);
+                ph.TakeEnemyDamage(1);
             }
         }
     }
+
+    public void LockMovement(float duration) => lockMovementTimer = duration;
+
     void OnDrawGizmosSelected()
     {
         if (groundCheck != null)

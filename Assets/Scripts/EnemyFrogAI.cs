@@ -66,15 +66,24 @@ public class EnemyFrogAI : MonoBehaviour
         anim.SetTrigger("frog_jumps");
 
         // 2. Wait until the frog is actually in the air (prevents instant landing trigger)
-        yield return new WaitUntil(() => !isGrounded);
+        yield return new WaitForSeconds(0.1f);
 
-        // 3. Wait until the frog hits the ground again
-        yield return new WaitUntil(() => isGrounded);
+        float timeout = 2f;
+        float timer = 0f;
 
-        rb.linearVelocity = Vector2.zero;
+        while (!isGrounded && timer < timeout)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        rb.gravityScale = 5f; // Ensure gravity is active
 
         // 4. The "Recovery" pause
         yield return new WaitForSeconds(timeBetweenJumps);
+
+        rb.gravityScale = 1f;
 
         isActing = false;
     }
