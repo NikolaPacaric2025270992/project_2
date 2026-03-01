@@ -74,6 +74,9 @@ public class PlayerHealth : MonoBehaviour
 
         StartCoroutine(FlashRed());
 
+        Animator anim = GetComponent<Animator>();
+        anim.SetTrigger("isHurt");
+
         ApplyKnockback();
 
         if (currentSegment <= 0)
@@ -98,6 +101,7 @@ public class PlayerHealth : MonoBehaviour
 
         rb.linearVelocity = Vector2.zero; // Reset current velocity
         rb.linearVelocity = new Vector2(dir * 9f, 9f); // Adjust knockback strength as needed
+
     }
 
     public void Heal(int segmentsGained)
